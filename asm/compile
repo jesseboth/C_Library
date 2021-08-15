@@ -1,0 +1,11 @@
+if [ -z "$1" ]; then
+    echo "File not given"
+elif [ -f "$1" ]; then
+    nasm -f elf32 -o __file__.o $1
+    ld -m elf_i386 -o a.out __file__.o
+    ./a.out
+    rm __file__.o
+else
+    echo "$1 not found"
+
+fi
