@@ -4,11 +4,10 @@ section .data
 
 hello: db "Hello World!", 0xA, 0
 
-error_digit: db "Error: -9 < n > 9", 0xA, 0
-
 section .bss
 c1      resb 2
-s1      resb 12
+b1      resb 5
+s1      resb 32
 
 section .text
 
@@ -16,33 +15,16 @@ _start:
         mov eax, hello
         call _print_string
 
-        mov eax, 0xabc
-        mov ebx, s1
-        call _int_to_string_hex
-        call _print_string
+        mov eax, 0x09fff953
+        call _print_int
         call _newline
 
-        mov eax, 0xA
-        call _digit_to_char
-        call _print_char
-        call _newline
+        mov eax, hello
+        mov ebx, 100
+        call _dump_mem
 
-        mov eax, -1234456
-        call _num_digits
-        call _digit_to_char
-        call _print_char
-        call _newline
 
-        mov eax, -2147483647
-        mov ebx, s1
-        call _int_to_string
-        mov eax, s1
-        call _print_string
-        call _newline
-
-_exit_program:
-
-        mov eax, 0x1
+        mov eax, 0x1    ; end 
         xor ebx, ebx
         int 0x80
 
@@ -61,7 +43,34 @@ _print_string:
         int 0x80           ; interrupt -> syscall
 
         ret
-;*input:
+
+;* (prints integer)
+;* input: 
+;*      eax: int
+_print_int:
+        push eax
+        push ebx
+        mov ebx, s1
+        call _int_to_string
+        mov eax, s1
+        call _print_string 
+        pop ebx
+        pop eax
+        ret
+
+;* (prints hexadecimal)
+;* input: 
+;*      eax: int
+_print_hex:
+        pusha
+        mov ebx, s1
+        call _int_to_string_hex
+        call _print_string
+        popa
+        ret
+
+;* (prints a single char)
+;* input:
 ;*      eax: char
 _print_char:
         pusha
@@ -76,11 +85,98 @@ _print_char:
         popa
         ret
 
+;* (prints a hex byte)
+;* input:
+;*      eax: byte
+_print_byte:
+        pusha
+        push ebx
+        push eax
+
+        mov ebx, b1
+        add ebx, 2
+        mov byte [ebx], 0x0
+        dec ebx
+
+        call _digit_to_char
+        mov byte [ebx], AL
+        dec ebx
+        pop eax
+        shr eax, 4
+        call _digit_to_char
+        mov byte [ebx], AL
+
+        mov eax, ebx
+        pop ebx
+
+        call _print_string
+        popa
+        ret
+
+;* (prints a newline)
 _newline:
         push eax
         mov eax, 0xA
         call _print_char
         pop eax
+        ret
+
+;* (prints a space)
+_space:
+        push eax
+        mov eax, 0x20
+        call _print_char
+        pop eax
+        ret
+
+;* (prints a tab)
+_tab:
+        push eax
+        mov eax, 0x9
+        call _print_char
+        pop eax
+        ret
+
+;*(print a chunk of memory)
+;* input: 
+;*      eax: offset location
+;*      ebx: size (bytes)
+_dump_mem:
+        mov ecx, 0
+        jmp .skip
+.looper:
+        call _newline
+.skip:
+        ;*print address
+        push eax
+        call _print_hex
+        call _tab
+        pop eax
+        ;*print address
+
+        push ecx        ; store
+        mov ecx, 0      ; init j
+.looper2:
+
+        push eax
+        mov eax, [eax]
+        call _print_byte
+        call _space
+        pop eax
+        inc eax         ; increment address
+        inc ecx         ; increment j
+        cmp ecx, 0x10   ; while (j < 16)
+        jl .looper2
+
+        pop ecx         ; restore
+
+        add ecx, 0x10   ; 16 bytes
+
+        cmp ecx, ebx    ; while (i < x)
+        jl .looper
+
+.exit:
+        call _newline
         ret
 
 ;*(String must end with NULL)
@@ -147,7 +243,7 @@ _num_digits:
 ;*      eax: int
 ;* output:
 ;*      eax: # digits
-num_hex:
+_num_hex:
         push ebx
         mov ebx, 0
 .looper:
@@ -159,7 +255,6 @@ num_hex:
         mov eax, ebx
         pop ebx
         ret
-
 
 ;* (converts an int to a string)
 ;* input:
@@ -217,16 +312,15 @@ _int_to_string_hex:
 
         push eax              ; store
 
-        call num_hex
+        call _num_hex
 
-        add ebx, eax          ; increment by num_hex
+        add ebx, eax          ; increment by _num_hex
 
         mov byte [ebx], 0     ; null terminate
         dec ebx               ; move back
 
         mov ecx, eax          ; i
         pop eax               ; restore input
-
 .looper:
         push eax
         call _digit_to_char   ; get char
