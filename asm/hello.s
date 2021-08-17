@@ -16,7 +16,13 @@ _start:
         mov eax, hello
         call _print_string
 
-        mov eax, 0x6
+        mov eax, 0xabc
+        mov ebx, s1
+        call _int_to_string_hex
+        call _print_string
+        call _newline
+
+        mov eax, 0xA
         call _digit_to_char
         call _print_char
         call _newline
@@ -58,6 +64,7 @@ _print_string:
 ;*input:
 ;*      eax: char
 _print_char:
+        pusha
         ; mov ecx, eax   ; mov char
         mov ecx, c1
         mov [ecx], eax
@@ -66,11 +73,14 @@ _print_char:
         mov edx, 1      
 
         int 0x80       ; interrupt
+        popa
         ret
 
 _newline:
+        push eax
         mov eax, 0xA
         call _print_char
+        pop eax
         ret
 
 ;*(String must end with NULL)
@@ -89,19 +99,19 @@ _string_length:
         mov eax, ebx
         ret
 
-;* (converts single digit to char)
+;* (converts least sig nibble to char)
 ;* input:
 ;*      eax: int
 ;* output:
 ;*      eax: char 
 _digit_to_char:
-        cmp eax, 0xA
-        jl .no_error
 
-        mov eax, error_digit   ; trigger error
-        call _print_string
-        jmp _exit_program      ; prevent errors
-.no_error:
+        and eax, 0xF    ; mask
+
+        cmp eax, 0xA
+        jl .under_ten
+        add eax, 0x7
+.under_ten:
         add eax, 0x30
         ret
 
@@ -132,7 +142,23 @@ _num_digits:
 .exit:
         ret
 
-        
+;* (gets # of hex digits in an int)
+;* input:
+;*      eax: int
+;* output:
+;*      eax: # digits
+num_hex:
+        push ebx
+        mov ebx, 0
+.looper:
+        add ebx, 2
+        shr eax, 8
+        cmp eax, 0x0
+        jne .looper
+
+        mov eax, ebx
+        pop ebx
+        ret
 
 
 ;* (converts an int to a string)
@@ -150,14 +176,13 @@ _int_to_string:
 
         pop ebx 
         pop eax
-        push eax
 
         cmp eax, 0
         jge .continue
 
         neg eax
         mov byte [ebx], '-'
-        ; inc ebx
+
 .continue:
         add ebx, ecx
         inc ebx
@@ -173,8 +198,48 @@ _int_to_string:
         cmp eax, 0
         jne .looper
 
-
-        pop eax
         mov eax, ebx
 
+        ret
+
+;* (converts an hex int to a string)
+;* input:
+;*      eax: int
+;*      ebx: ptr
+;* output
+;*      eax: ptr
+_int_to_string_hex:
+
+        mov byte [ebx], '0'   ; lead with 0x
+        inc ebx
+        mov byte [ebx], 'x'
+        inc ebx
+
+        push eax              ; store
+
+        call num_hex
+
+        add ebx, eax          ; increment by num_hex
+
+        mov byte [ebx], 0     ; null terminate
+        dec ebx               ; move back
+
+        mov ecx, eax          ; i
+        pop eax               ; restore input
+
+.looper:
+        push eax
+        call _digit_to_char   ; get char
+        
+        mov byte [ebx], AL    ; store
+        dec ebx 
+        pop eax
+        shr eax, 4            ; right shift -> 4 bits
+
+        dec ecx               ; i--
+        cmp ecx, 0            ; while (i > 0)
+        jne .looper
+
+        sub ebx, 2            ; back to start
+        mov eax, ebx          ; ret val
         ret
