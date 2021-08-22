@@ -1,38 +1,17 @@
-global _start
-
-section .data
-
-hello: db "Hello World!", 0xA, 0
-
 section .bss
-c1      resb 2
-b1      resb 5
+h1      resb 32
 s1      resb 32
+b1      resb 5
+c1      resb 2
 
 section .text
 
-_start:
-        mov eax, hello
-        call _print_string
-
-        mov eax, 0x09fff953
-        call _print_int
-        call _newline
-
-        mov eax, hello
-        mov ebx, 100
-        call _dump_mem
-
-
-        mov eax, 0x1    ; end 
-        xor ebx, ebx
-        int 0x80
 
 ;* (print a string)
 ;* input:
 ;*      eax: string ptr
 _print_string:
-
+        pusha
         mov ecx, eax    ; store
         call _string_length
 
@@ -41,7 +20,7 @@ _print_string:
         mov ebx, 1         ; fd
 
         int 0x80           ; interrupt -> syscall
-
+        popa
         ret
 
 ;* (prints integer)
@@ -63,7 +42,7 @@ _print_int:
 ;*      eax: int
 _print_hex:
         pusha
-        mov ebx, s1
+        mov ebx, h1
         call _int_to_string_hex
         call _print_string
         popa
@@ -142,7 +121,11 @@ _tab:
 ;*      eax: offset location
 ;*      ebx: size (bytes)
 _dump_mem:
+        pusha
         mov ecx, 0
+
+        and eax, 0xFFFFFFF0
+
         jmp .skip
 .looper:
         call _newline
@@ -177,6 +160,7 @@ _dump_mem:
 
 .exit:
         call _newline
+        popa
         ret
 
 ;*(String must end with NULL)
@@ -336,4 +320,29 @@ _int_to_string_hex:
 
         sub ebx, 2            ; back to start
         mov eax, ebx          ; ret val
+        ret
+
+;* (read from a file)
+;* input:
+;*      eax: file name
+;*      ebx: buffer
+;*      ecx: size
+_read_file:
+
+        push ecx       
+        push ebx
+        push eax
+        
+        mov eax, 5     ; open
+        pop ebx        ; file name
+        mov ecx, 0     ; read-only mode
+        int 0x80     
+
+        mov ebx, eax   ;fd
+        mov eax, 3     ; read
+        pop ecx        ; buffer
+        pop edx        ; buffer size
+        int  0x80        
+
+
         ret
