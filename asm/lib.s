@@ -27,14 +27,12 @@ _print_string:
 ;* input: 
 ;*      eax: int
 _print_int:
-        push eax
-        push ebx
+        pusha
         mov ebx, s1
         call _int_to_string
         mov eax, s1
         call _print_string 
-        pop ebx
-        pop eax
+        popa
         ret
 
 ;* (prints hexadecimal)
@@ -281,6 +279,22 @@ _int_to_string:
 
         ret
 
+;* (converts string to an int)
+;* input:
+;*      eax: null terminated string
+_string_to_int:
+        push ebx
+        mov ebx, [eax]
+        cmp ebx, 0x2D
+        je .negative
+
+.negative:
+
+
+.leave:
+        pop ebx
+        ret
+
 ;* (converts an hex int to a string)
 ;* input:
 ;*      eax: int
@@ -346,3 +360,4 @@ _read_file:
 
 
         ret
+        
