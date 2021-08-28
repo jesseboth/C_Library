@@ -1,3 +1,9 @@
+;*RULES*;
+;* Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+;* Any live cell with two or three live neighbours lives on to the next generation.
+;* Any live cell with more than three live neighbours dies, as if by overpopulation.
+;* Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+
 global _start
 %include "lib.s"
 
@@ -44,11 +50,9 @@ _start:
         call _read_file
 
         pop eax                 ; iterations
-        ; call _string_to_int
-        ;*TODO: Finish _string_to_int
-        ;*      Figure out timer
-        mov eax, 100
-        mov ebx, 0x0
+        call _string_to_int
+
+        xor ebx, ebx            ; zero out
 .again:
         push eax
         push ebx
@@ -59,6 +63,10 @@ _start:
         call _newline
 
         call life
+
+        xor eax, eax            ; 0 seconds
+        mov ebx, 500            ;.5 seconds
+        call _sleep
 
         pop ebx
         pop eax
@@ -74,11 +82,6 @@ _start:
         xor ebx, ebx
         int 0x80
         ret
-
-;* Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-;* Any live cell with two or three live neighbours lives on to the next generation.
-;* Any live cell with more than three live neighbours dies, as if by overpopulation.
-;* Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 
 life:
 
@@ -152,8 +155,7 @@ life:
         inc eax                 ; o o o 
         call check_pos          ; o @ o
                                 ; o o x
-
-        mov eax, 0
+        xor eax, eax
         mov ecx, cur_sub        ; determine if dead or alive
         mov ecx, [ecx]
         mov AL, [ecx]
@@ -182,7 +184,7 @@ life:
         jmp .finish_iter
 .kill:
 
-        mov ebx, 0
+        xor ebx, ebx
         mov ecx, current
         mov ecx, [ecx]          ; address of char
         mov ebx, DEAD
@@ -190,7 +192,7 @@ life:
 
         jmp .finish_iter
 .birth:
-        mov ebx, 0
+        xor ebx, ebx
         mov ecx, current
         mov ecx, [ecx]          ; address of char
         mov ebx, LIVE
@@ -310,7 +312,7 @@ copy_row:
 check_pos:
         push eax
         push ebx
-        mov ebx, 0
+        xor ebx, ebx
         mov BL, byte [eax]
 
         cmp ebx, LIVE

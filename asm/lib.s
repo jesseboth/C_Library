@@ -4,6 +4,11 @@ s1      resb 32
 b1      resb 5
 c1      resb 2
 
+section .data
+TIME:
+    Tsec  dd 0
+    Tusec dd 0
+
 section .text
 
 
@@ -167,6 +172,7 @@ _dump_mem:
 ;*output:
 ;*      eax: length
 _string_length:
+        push ebx
         mov ebx, 0            ; store length
 .looper:
         add eax, 1
@@ -175,6 +181,7 @@ _string_length:
         cmp byte [eax], 0x0   ; while (*ecx != 0)
         jne .looper            ; {}
         mov eax, ebx
+        pop ebx
         ret
 
 ;* (converts least sig nibble to char)
@@ -283,16 +290,21 @@ _int_to_string:
 ;* input:
 ;*      eax: null terminated string
 _string_to_int:
-        push ebx
-        mov ebx, [eax]
-        cmp ebx, 0x2D
-        je .negative
-
-.negative:
-
-
+        mov edx, eax    ; store
+atoi:
+        xor eax, eax
+.looper:
+        movzx ecx, byte [edx] ;char
+        inc edx                        ; next char
+        cmp ecx, 0x30           ; num char
+        jb .leave
+        cmp ecx, 0x39
+        ja .leave
+        sub ecx, 0x30
+        imul eax, 10            ; multiplier
+        add eax, ecx ;          ; add to current
+        jmp .looper ; until do
 .leave:
-        pop ebx
         ret
 
 ;* (converts an hex int to a string)
@@ -360,4 +372,23 @@ _read_file:
 
 
         ret
-        
+
+;* (sleeps for a seconds and b nano seconds)
+;* input:
+;*      eax: time (in seconds)        
+;*      ebx: time (in miliseconds)
+_sleep:
+        pusha
+        mov dword [Tsec], eax
+
+        mov eax, ebx
+        mov ebx, 1000000        ; convert nano sec to milli
+        mul ebx
+        mov dword [Tusec], eax  ; set val
+
+        mov eax, 162            ; syscall nano sleep
+        mov ebx, TIME           ; struct
+        mov ecx, 0              
+        int 0x80
+        popa
+        ret
