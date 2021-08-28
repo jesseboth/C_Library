@@ -83,10 +83,12 @@ _start:
         int 0x80
         ret
 
+;* (determine new generation)
+;* input:
+;*      none
 life:
 
-        mov eax, board_buffer
-        add eax, BOARD_WIDTH            ; inc to line in play
+        mov eax, board_buffer+BOARD_WIDTH
 
         mov ebx, board_cpy_cur          ; copy top row
         call copy_row
@@ -95,33 +97,20 @@ life:
         add ebx, BOARD_WIDTH
         call copy_row
 
-        mov eax, board_buffer
-        add eax, BOARD_WIDTH
+        mov eax, board_buffer+BOARD_WIDTH
         inc eax                         ; current cell
-        mov ecx, current
-        mov [ecx], eax                  ; store 
-        
-        ; mov eax, board_buffer
-        ; add eax, BOARD_WIDTH
-        ; inc eax
 
-        mov ecx, cur_sub                ; stores cur on sub board
-        mov eax, board_cpy_cur          
-        inc eax
-        mov [ecx], eax                  ; sub board current address
+        mov [current], eax
+
+        mov eax, board_cpy_cur+1        ; first playable char
+        mov [cur_sub], eax              ; sub board current address
         
-        mov ecx, cur_x
-        mov word [ecx], 0x0
-        mov ecx, cur_y
-        mov word [ecx], 0x0
+        mov word [cur_x], 0x0
+        mov word [cur_y], 0x0
 
 .loop:
-        mov eax, cur_sub
-        mov eax, [eax]
-
-        mov ecx, neigbors
-        mov word [ecx], 0x0
-
+        mov eax, [cur_sub]              ; store address
+        mov word [neigbors], 0x0        ; zero out
 
 .up_left:
         sub eax, BOARD_WIDTH    ; x o o       
@@ -156,12 +145,10 @@ life:
         call check_pos          ; o @ o
                                 ; o o x
         xor eax, eax
-        mov ecx, cur_sub        ; determine if dead or alive
-        mov ecx, [ecx]
+        mov ecx, [cur_sub]      ; determine if dead or alive
         mov AL, [ecx]
 
-        mov ecx, neigbors
-        mov ecx, [ecx]
+        mov ecx, [neigbors]
 
         cmp eax, DEAD
         je .birth_check
@@ -185,57 +172,45 @@ life:
 .kill:
 
         xor ebx, ebx
-        mov ecx, current
-        mov ecx, [ecx]          ; address of char
+        mov ecx, [current]      ; current char
         mov ebx, DEAD
         mov [ecx], BL
 
         jmp .finish_iter
 .birth:
         xor ebx, ebx
-        mov ecx, current
-        mov ecx, [ecx]          ; address of char
+        mov ecx, [current]      ; current char
         mov ebx, LIVE
         mov [ecx], BL
 
 .live:
 .finish_iter:
-        mov ecx, cur_x
-        mov ebx, [ecx]
+        mov ebx, [cur_x]
         inc ebx
-        mov [ecx], ebx
+        mov [cur_x], ebx
 
-        mov ecx, current
-        mov ebx, [ecx]
+        mov ebx, [current]
         inc ebx
-        mov [ecx], ebx
+        mov [current], ebx
 
-        mov ecx, cur_sub
-        mov ebx, [ecx]
+        mov ebx, [cur_sub]
         inc ebx
-        mov [ecx], ebx
+        mov [cur_sub], ebx
 
-        mov ecx, cur_x
-        mov ecx, [ecx]
-
-
-
+        mov ecx, [cur_x]
         cmp ecx, WIDTH
         jl .loop
 
 .next_line:
-        mov ecx, cur_x                  ; set x to 0
-        mov byte [ecx], 0x0
+        mov byte [cur_x], 0x0           ; row start
 
-        mov ecx, cur_y                  ; increment y
-        mov ebx, [ecx]
+        mov ebx, [cur_y]                ; increment y
         inc ebx
-        mov [ecx], ebx
+        mov [cur_y], ebx
 
-        mov ecx, current                ; mov current to next line
-        mov ebx, [ecx]
+        mov ebx, [current]              ; mov current to next line
         add ebx, 3
-        mov [ecx], ebx
+        mov [current], ebx
 
         mov eax, board_cpy_cur          ; shift copies up
         mov ebx, board_cpy_above
@@ -245,27 +220,18 @@ life:
         mov ebx, board_cpy_cur
         call copy_row
 
-        mov ecx, current                ; copy next line on board
-        mov eax, [ecx]
+        mov eax, [current]              ; copy next line on board
         add eax, BOARD_WIDTH
         dec eax
         mov ebx, board_cpy_below
         call copy_row
 
-        mov ecx, board_cpy_cur          ; get pos
-        mov eax, cur_sub 
-        inc ecx
-        mov [eax], ecx                  ; store address
+        mov ecx, board_cpy_cur+1          ; get pos
+        mov [cur_sub], ecx                ; store address
 
-        mov ecx, cur_y
-        mov ecx, [ecx]
-
+        mov ecx, [cur_y]
         cmp ecx, HEIGHT
         jl .loop
-
-
-.next_board:
-
 
         ret
 
@@ -318,10 +284,9 @@ check_pos:
         cmp ebx, LIVE
         jne .leave
 
-        mov ebx, neigbors
-        mov eax, [ebx]
+        mov eax, [neigbors]
         inc eax
-        mov [ebx], eax
+        mov [neigbors], eax
 
 .leave:
         pop ebx
