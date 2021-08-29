@@ -3,18 +3,18 @@ if [ -z "$1" ]; then
 elif [ -z "$2" ]; then
     nasm -f elf32 -o __file__.o $1
     ld -m elf_i386 -o a.out __file__.o
-    ./a.out
     rm __file__.o
+    ./a.out
 elif [ -z "$3" ]; then
     nasm -f elf32 -o __file__.o $1
     ld -m elf_i386 -o a.out __file__.o
-    ./a.out $2 0
     rm __file__.o 
+    ./a.out $2 0
 elif [ "$3" ]; then
     nasm -f elf32 -o __file__.o $1
     ld -m elf_i386 -o a.out __file__.o
-    ./a.out $2 $3
     rm __file__.o
+    ./a.out $2 $3
 
 else
     echo "$1 or $2 not found"

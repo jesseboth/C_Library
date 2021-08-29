@@ -31,7 +31,7 @@ board_cpy_below resb 83         ; below current
 
 current         resb 8          ; address
 cur_sub         resb 8
-neigbors        resb 8          ; number of neighbors
+neighbors        resb 8          ; number of neighbors
 cur_x           resb 8
 cur_y           resb 8
 
@@ -110,7 +110,7 @@ life:
 
 .loop:
         mov eax, [cur_sub]              ; store address
-        mov word [neigbors], 0x0        ; zero out
+        mov word [neighbors], 0x0        ; zero out
 
 .up_left:
         sub eax, BOARD_WIDTH    ; x o o       
@@ -148,7 +148,7 @@ life:
         mov ecx, [cur_sub]      ; determine if dead or alive
         mov AL, [ecx]
 
-        mov ecx, [neigbors]
+        mov ecx, [neighbors]
 
         cmp eax, DEAD
         je .birth_check
@@ -284,9 +284,9 @@ check_pos:
         cmp ebx, LIVE
         jne .leave
 
-        mov eax, [neigbors]
+        mov eax, [neighbors]
         inc eax
-        mov [neigbors], eax
+        mov [neighbors], eax
 
 .leave:
         pop ebx
