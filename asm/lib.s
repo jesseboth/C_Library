@@ -6,8 +6,8 @@ c1      resb 2
 
 section .data
 TIME:
-    Tsec  dd 0
-    Tusec dd 0
+        Tsec  dd 0
+        Tusec dd 0
 
 section .text
 

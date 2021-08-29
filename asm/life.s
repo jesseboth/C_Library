@@ -23,7 +23,6 @@ section .bss
 buf             resb 0x9        ; align
 board_buffer    resb 2832       ; size of board for read
 
-
 board_cpy       resb 0          ; start of space place holder
 board_cpy_above resb 83         ; above current
 board_cpy_cur   resb 83         ; current
@@ -36,7 +35,6 @@ cur_x           resb 8
 cur_y           resb 8
 
 section .text
-
 
 ;* 2 inputs - filename, # of iterations
 _start:
@@ -87,7 +85,6 @@ _start:
 ;* input:
 ;*      none
 life:
-
         mov eax, board_buffer+BOARD_WIDTH
 
         mov ebx, board_cpy_cur          ; copy top row
@@ -270,7 +267,6 @@ copy_row:
         pop ebx
         pop eax
         ret
-
 
 ;* (checks if cell is dead or alive)
 ;* input:
