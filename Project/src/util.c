@@ -35,7 +35,7 @@ int mem_cpy(void *src, void *dest, volatile size_t bytes){
 
     uint32_t *src_32 = (uint32_t *)src_8;
     uint32_t *dest_32 = (uint32_t *)dest_8;
-    for(bytes; bytes > 4; bytes-=4, src_32++, dest_32++){
+    for(bytes; bytes > 3; bytes-=4, src_32++, dest_32++){
         *dest_32 = *src_32;
     }
 
@@ -43,6 +43,30 @@ int mem_cpy(void *src, void *dest, volatile size_t bytes){
     dest_8 = (uint8_t *)dest_32;
     for(bytes; bytes > 0; bytes--, src_8++, dest_8++){
         *dest_8 = *src_8;
+    }
+
+    return 1;
+}
+
+int mem_clear(void *src, size_t bytes){
+    uint8_t *src_8 = src;
+
+    if(src == NULL){
+        return 0;
+    }
+
+    for(src_8; ((uint32_t)src_8 & 0x3) != 0; src_8++, bytes--){
+        *src_8 = NULL;
+    }
+
+    uint32_t *src_32 = src_8;
+    for(bytes; bytes > 3; bytes--, src_32++){
+        *src_32 = NULL;
+    }
+
+    src_8 = src_32;
+    for(bytes; bytes > 0; bytes--, src_8++){
+        *src_8 = NULL;
     }
 
     return 1;
