@@ -122,3 +122,27 @@ void print_row(uint8_t *ptr){
     }
     printf("\n");
 }
+
+int powerOf2(size_t val){
+    size_t test = 1;
+    for(int i = 1; test < val; i++){
+        test = 1 << i;
+    }
+    if(val == test) return 1;
+
+    return 0;
+}
+
+void *align(void *ptr, uint8_t by){
+    if(ptr == NULL){
+        return NULL;
+    }
+    if(!powerOf2(by)){
+        printf("Invalid alignment\n");
+        return NULL;
+    }
+
+    for(ptr; (uintptr_t)ptr & (by-1); ptr--);
+
+    return ptr;
+}
