@@ -1,7 +1,7 @@
 CC := gcc
 CFLAGS := -g -Wall -std=c99 -fPIC -D_DEFAULT_SOURCE -lm
-CODE   := src/main.o src/util.o src/geom.o src/timer.o src/array.o
-C_CODE := src/main.c src/util.c src/geom.c src/timer.c src/array.c
+CODE   := src/main.o src/util.o src/geom.o src/timer.o src/array.o src/linked_lib.o
+C_CODE := src/main.c src/util.c src/geom.c src/timer.c src/array.c src/linked_lib.c
 TESTS :=
 
 
@@ -46,7 +46,7 @@ test: $(TESTS) $(NEWTESTS)
 
 clean:
 	rm -f $(TESTS) a.out
-	rm -f src/*.o tests/*.o *~ src/*~ tests/*~  src/*.s
+	rm -f src/*.o tests/*.o *~ src/*~ tests/*~  *.s
 
 # See previous assignments for a description of .PHONY
 .PHONY: all clean
