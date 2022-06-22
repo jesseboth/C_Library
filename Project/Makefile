@@ -1,6 +1,7 @@
 CC := gcc
-CFLAGS := -g -Wall -std=c99 -fPIC -D_DEFAULT_SOURCE
-CODE := src/main.o src/util.o
+CFLAGS := -g -Wall -std=c99 -fPIC -D_DEFAULT_SOURCE -lm
+CODE   := src/main.o src/util.o src/geom.o src/timer.o src/array.o
+C_CODE := src/main.c src/util.c src/geom.c src/timer.c src/array.c
 TESTS :=
 
 
@@ -17,6 +18,9 @@ run:
 debug: $(CODE)
 	$(CC) -o $@ $^ $(CFLAGS)
 	@gdb ./a.out
+
+asm:
+	$(CC) -S $(C_CODE)
 
 test: $(TESTS) $(NEWTESTS)
 	@echo
@@ -42,7 +46,7 @@ test: $(TESTS) $(NEWTESTS)
 
 clean:
 	rm -f $(TESTS) a.out
-	rm -f src/*.o tests/*.o *~ src/*~ tests/*~
+	rm -f src/*.o tests/*.o *~ src/*~ tests/*~  src/*.s
 
 # See previous assignments for a description of .PHONY
 .PHONY: all clean
