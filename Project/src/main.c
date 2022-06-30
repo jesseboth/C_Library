@@ -7,6 +7,7 @@
 #include "array.h"
 #include "geom.h"
 #include "timer.h"
+#include "linked_lib.h"
 
 int *selection_sort(int *arr, int length){
     int least, least_j;
@@ -25,10 +26,7 @@ int *selection_sort(int *arr, int length){
     return arr;
 }
 
-
-int main(int argc, char **argv){
-
-
+void test_array(void){
     int dim[3] = {2, 2, 5};
     int ***test = multi_array_create(dim, 3, sizeof(int));
     printf("%p\n", test);
@@ -54,7 +52,12 @@ int main(int argc, char **argv){
         }
         printf("\n");
     }
+}
 
+
+int main(int argc, char **argv){
+
+    test();
 
     return 0;
 }
