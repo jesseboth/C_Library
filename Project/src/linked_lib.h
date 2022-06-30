@@ -4,6 +4,7 @@
 #define SINGLE 0
 #define DOUBLE 1
 
+
 typedef struct SinglyNode{
     struct SinglyNode *next;
     void *data;
@@ -23,3 +24,4 @@ typedef struct DoublyLinkedList{
     DoublyNode *head;
     DoublyNode *tail;
 }DoublyLinkedList;
+typedef void * elem;
