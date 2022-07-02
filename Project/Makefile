@@ -1,13 +1,18 @@
 CC := gcc
 CFLAGS := -g -Wall -std=c99 -fPIC -D_DEFAULT_SOURCE -lm
-CODE   := src/main.o src/util.o src/geom.o src/timer.o src/array.o src/linked_lib.o
-C_CODE := src/main.c src/util.c src/geom.c src/timer.c src/array.c src/linked_lib.c
-TESTS :=
+CODE   := src/utility/util.o src/utility/geom.o src/utility/timer.o src/linked_lib.o
+C_CODE := src/utility/util.c src/utility/geom.c src/utility/timer.c src/linked_lib.c
+
+
+TESTS_UTIL := util~mem_cpy util~mem_clear
+TESTS_LINKED := linkedlist~insert linkedlist~sort
+
+TESTS := $(TESTS_UTIL) $(TESTS_LINKED)
 
 
 all: a.out run
 
-a.out: $(CODE)
+a.out: $(CODE) src/main.o
 	$(CC) -o $@ $^ $(CFLAGS)
 
 run:
@@ -15,14 +20,14 @@ run:
 	@./a.out
 	@echo " "
 
-debug: $(CODE)
+debug: $(CODE) src/main.o
 	$(CC) -o $@ $^ $(CFLAGS)
 	@gdb ./a.out
 
 asm:
 	$(CC) -S $(C_CODE)
 
-test: $(TESTS) $(NEWTESTS)
+test: $(TESTS)
 	@echo
 	@for test in $^; do                                   \
 	    printf "Running %-30s: " "$$test";                \
@@ -33,6 +38,7 @@ test: $(TESTS) $(NEWTESTS)
 # to create an object file from a source C file.
 %.o: %.c
 	$(CC) -c $< -o $@ $(CFLAGS)
+ 
 
 # This pattern will build any self-contained test file in tests/.  If
 # your test file needs more support, you will need to write an explicit
