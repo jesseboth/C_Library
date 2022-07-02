@@ -1,5 +1,5 @@
 #include "linked_lib.h"
-#include "print.h"
+#include "utility/print.h"
 
 #define sizeof(Meta) 16
 
@@ -210,7 +210,6 @@ void *LinkedList_insertionSort(void *list, void *data){
         int i = 0;
         for(;iter->next && iter->next->data < data; i++, iter = iter->next);
         
-            printf("here\n");
         if(i == 0){
             d->head->prev = node; 
             node->next = d->head;
@@ -427,6 +426,7 @@ static void *Node_reverse(void *ptr, uint8_t type){
         node->next = NULL;
         return res;
     }
+    return NULL;
 }
 
 void LinkedList_reverse(void *list){

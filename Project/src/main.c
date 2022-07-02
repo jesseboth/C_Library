@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "util.h"
-#include "macros.h"
+#include "utility/util.h"
+#include "utility/macros.h"
+#include "utility/geom.h"
+#include "utility/timer.h"
+
 #include "array.h"
-#include "geom.h"
-#include "timer.h"
 #include "linked_lib.h"
 
 int *selection_sort(int *arr, int length){
@@ -25,35 +26,6 @@ int *selection_sort(int *arr, int length){
     }
     return arr;
 }
-
-void test_array(void){
-    int dim[3] = {2, 2, 5};
-    int ***test = multi_array_create(dim, 3, sizeof(int));
-    printf("%p\n", test);
-
-    int count = 0;
-    for(int i = 0; i < dim[0]; i++){
-        for(int j = 0; j < dim[1]; j++){
-            for(int k = 0; k < dim[0]; k++){
-                printf("%d\n", count);
-                test[i][j][k] = count++;
-            }
-        }
-
-    }
-
-    for(int i = 0; i < dim[0]; i++){
-        printf("[");
-        for(int j = 0; j < dim[1]; j++){
-            for(int k = 0; k < dim[2]; k++){
-                printf("%d, ", test[i][j][k]);
-            }
-            printf("]");
-        }
-        printf("\n");
-    }
-}
-
 
 int main(int argc, char **argv){
 

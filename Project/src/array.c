@@ -1,9 +1,9 @@
 #include "array.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "util.h"
-#include "print.h"
+#include "utility/util.h"
+#include "utility/print.h"
 
 struct _array_data{
     unsigned long int dimension;
@@ -121,4 +121,32 @@ void *get_data(int *index, int len_index, void *arr){
         ptr = *ptr;
     }    
     return ptr+index[len_index-1];
+}
+
+void test_array(void){
+    int dim[3] = {2, 2, 5};
+    int ***test = multi_array_create(dim, 3, sizeof(int));
+    printf("%p\n", test);
+
+    int count = 0;
+    for(int i = 0; i < dim[0]; i++){
+        for(int j = 0; j < dim[1]; j++){
+            for(int k = 0; k < dim[0]; k++){
+                printf("%d\n", count);
+                test[i][j][k] = count++;
+            }
+        }
+
+    }
+
+    for(int i = 0; i < dim[0]; i++){
+        printf("[");
+        for(int j = 0; j < dim[1]; j++){
+            for(int k = 0; k < dim[2]; k++){
+                printf("%d, ", test[i][j][k]);
+            }
+            printf("]");
+        }
+        printf("\n");
+    }
 }
