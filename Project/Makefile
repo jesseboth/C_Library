@@ -4,11 +4,10 @@ CODE   := src/utility/util.o src/utility/geom.o src/utility/timer.o src/linked_l
 C_CODE := src/utility/util.c src/utility/geom.c src/utility/timer.c src/linked_lib.c
 
 
-TESTS_UTIL := util~mem_cpy util~mem_clear
-TESTS_LINKED := linkedlist~insert linkedlist~sort
-
-TESTS := $(TESTS_UTIL) $(TESTS_LINKED)
-
+TESTS := $(wildcard tests/*)
+TESTS := $(subst .c,,$(TESTS))
+TESTS := $(subst tests/,,$(TESTS))
+TESTS := $(filter-out _template,$(TESTS))
 
 all: a.out run
 
@@ -29,9 +28,10 @@ asm:
 
 test: $(TESTS)
 	@echo
-	@for test in $^; do                                   \
-	    printf "Running %-30s: " "$$test";                \
-	    (./$$test && echo "passed") || echo "failed";       \
+	@for test in $^; do                                    		\
+		printf "\nRunning %-s\n" "$$test";               		 \
+		(./$$test && printf "Result  %-30s: ✔\n" "$$test";) || 	\
+		printf "Result  %-30s: ❌\n" "$$test";       			\
 	done
 	@echo
 
@@ -48,7 +48,7 @@ test: $(TESTS)
 # main function and all of the relevant test code, then add the basename
 # of the file (e.g., testname in this example) to TESTS, above.
 %: tests/%.o $(CODE)
-	$(CC) -o $@ $^
+	@$(CC) -o $@ $^
 
 clean:
 	rm -f $(TESTS) a.out
