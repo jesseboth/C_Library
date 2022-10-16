@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+
 #include "../src/utility/util.h"
 
 int main(int argc, char *argv[]) {
